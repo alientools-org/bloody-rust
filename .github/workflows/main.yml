@@ -1,0 +1,42 @@
+name: Build and Release Rust Project
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Initialize Greeter Session
+      run: echo "Nothing Else Matter Bro, COmpiling ur fckng, build"
+
+
+    - name: Unnötig
+      run: apt install rust cargo
+      
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Build release binary
+      run: cargo build --release
+
+    - name: Find binaries
+      id: find_binaries
+      run: |
+        # Find all files without extension in target/release (likely binaries)
+        BINARIES=$(find target/release -maxdepth 1 -type f -executable ! -name "*.d" ! -name "*.rlib" ! -name "*.so" ! -name "*.dll" ! -name "*.a" ! -name "*.exe")
+        echo "BINARIES=$BINARIES" >> $GITHUB_ENV
+        echo "Found binaries:"
+        echo "$BINARIES"
+
+    - name: Upload release assets
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ env.BINARIES }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
