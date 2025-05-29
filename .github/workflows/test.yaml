@@ -1,0 +1,30 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"  # Wird nur bei neuen Tags wie v1.2.3 getriggert
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build Release Binary
+        run: cargo build --release
+
+      - name: Create Release Asset Directory
+        run: mkdir -p release && cp target/release/<dein_binary_name> release/
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/<dein_binary_name>
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
